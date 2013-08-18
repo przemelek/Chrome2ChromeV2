@@ -36,7 +36,7 @@ chrome.storage.onChanged.addListener(function (changes, namespace) {
                     elems = opened.split("\n");
                   }
                   while (elems.length>9) elems.shift();
-                  elems.push(content);
+                  elems.push(newValue[i]);
                   localStorage.opened=elems.join("\n");
                 }
                 // at the end we want to keep everything small, so remove data from transfer objects

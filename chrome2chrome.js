@@ -46,18 +46,28 @@ function init() {
 		openedArray = opened.split("\n");
 	}
 	var zaw = "";
+  var marker = $("marker");
+  var openedMap = new Object();
 	for (var i=0; i<openedArray.length; i++) {
+     var urlToOpen = openedArray[i];
+     if (openedMap[urlToOpen]) continue;
+     openedMap[urlToOpen]=true;
 	   var toDisplay = openedArray[i];
 	   if (toDisplay.indexOf("://")!=-1) {
-		toDisplay=toDisplay.substring(toDisplay.indexOf("://")+3);
+		   toDisplay=toDisplay.substring(toDisplay.indexOf("://")+3);
 	   }
-	   if (toDisplay.length>30) toDisplay=toDisplay.substring(0,14)+"...."+toDisplay.substring(toDisplay.length-15);
-	   zaw+="<font size=\"-1\"><a href=\"#\" onclick=\"chrome.tabs.create({url:'"+openedArray[i]+"'})\">"+toDisplay+"</a></font><br />";
-	}
-	if (zaw.length>0) {
-	  zaw="Last open:<br />"+zaw+"<hr width=\"50%\" />";
-	}
-	$("lastOpened").innerHTML=zaw;
+	   if (toDisplay.length>30) toDisplay=toDisplay.substring(0,14)+"...."+toDisplay.substring(toDisplay.length-15).trim().replace("\n"," ").replace("\t"," ");     
+     var newNode = document.createElement("A");
+     newNode.onclick=function(event) {
+        var element = event.srcElement.parentNode;
+        chrome.tabs.create({url:element.href2});
+     };
+     newNode.innerHTML="<font size=\"-1\">"+toDisplay+"</font>";
+     newNode.href="#";
+     newNode.href2=urlToOpen;
+     $("lastOpened").insertBefore(newNode,marker)
+     $("lastOpened").insertBefore(document.createElement("BR"),marker)
+	}  
 }
 
 try {
