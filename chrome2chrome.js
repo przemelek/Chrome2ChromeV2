@@ -1,10 +1,5 @@
 function $(id) { return document.getElementById(id); }
 
-function showCred() {
-	$("credButton").style.display="none";
-	$("credentials").style.display="block";
-}
-
 function send() {
 	var targetComputer = $("selector").value;
 	$("content").innerHTML="&nbsp;&nbsp;&nbsp;Sending....&nbsp;&nbsp;&nbsp;";
