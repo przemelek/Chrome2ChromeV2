@@ -1,5 +1,49 @@
 function $(id) { return document.getElementById(id); }
 
+var oldContent = $("content").innerHTML;
+
+function showConfig() {
+  $("manageButton").onclick=function() {
+    $("content").innerHTML=oldContent;
+    init();
+    $("manageButton").innerHTML="Manage";
+    $("manageButton").onclick=showConfig;    
+  };
+  $("manageButton").innerHTML="back.."
+  var content = "<h2>Manage computers</h2>Delete machine:<br /><div id='marker2'></div>";
+  $("content").innerHTML=content;
+  var listOfComputers = localStorage.listOfComputers;
+  var elems = listOfComputers.split(",");
+  elems.sort();
+  var marker = $("marker2");
+  for (var i=0; i<elems.length; i++) {
+    if (localStorage.computerName==elems[i]) continue;
+    if (elems[i]!="" && elems[i]!=null) {
+     var newNode = document.createElement("A");
+     newNode.setAttribute("computerName",elems[i]);
+     newNode.onclick=function(event) {
+        var element = event.srcElement;
+        var name = element.getAttribute("computerName");
+        chrome.storage.sync.get(function(items) {
+          var newComputerNames = new Array();
+          for (var i=0; i<items.computers.length; i++) {
+            if (items.computers[i]!=name) newComputerNames.push(items.computers[i]);
+          }
+          items.computers=newComputerNames;
+          chrome.storage.sync.set(items);
+          setTimeout(showConfig,100);          
+        });
+        
+     };
+     newNode.innerHTML=elems[i];
+     newNode.href="#";
+     $("content").insertBefore(newNode,marker)
+     $("content").insertBefore(document.createElement("BR"),marker)     
+    }
+  }
+  
+}
+
 function send() {
 	var targetComputer = $("selector").value;
 	$("content").innerHTML="&nbsp;&nbsp;&nbsp;Sending....&nbsp;&nbsp;&nbsp;";
@@ -72,6 +116,7 @@ function init() {
 
 try {
 	init();
+  $("manageButton").onclick=showConfig;
 } catch (e) {
    console.log(e);
 }
