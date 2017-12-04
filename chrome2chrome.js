@@ -49,7 +49,17 @@ function showConfig() {
 
 function send() {
     var targetComputer = $("selector").value;
+
+    var h = $("h").value;
+    var mi = $("mi").value;
+    var y = $("y").value;
+    var m = $("m").value;
+    var d = $("d").value;
+    var time=Date.parse(y+"-"+m+"-"+d+" "+h+":"+mi);
+    var useTime=$("hid").present;
+
     $("content").innerHTML = "&nbsp;&nbsp;&nbsp;Sending....&nbsp;&nbsp;&nbsp;";
+
     setTimeout(function () {
         var req = {};
         req.cmd = "req";
@@ -62,15 +72,20 @@ function send() {
             }
             chrome.tabs.getSelected(null, function (tab) {
                 var url = tab.url;
-                urls.push(tab.url);
-                var sent = localStorage.sent;
-                var elems = [];
-                if (sent == "" || sent) {
-                    elems = sent.split("\n");
+                if (useTime) {
+                    url+="|"+time;
                 }
-                elems.push(url);
-                while (elems.length > 9) elems.shift();
-                localStorage.sent = elems.join("\n");
+                urls.push(url);
+                if (!useTime) {
+                    var sent = localStorage.sent;
+                    var elems = [];
+                    if (sent == "" || sent) {
+                        elems = sent.split("\n");
+                    }
+                    elems.push(url);
+                    while (elems.length > 9) elems.shift();
+                    localStorage.sent = elems.join("\n");
+                }
                 chrome.storage.sync.set(items);
                 $("content").innerHTML = "&nbsp;&nbsp;&nbsp;Sent :-)&nbsp;&nbsp;&nbsp;";
             });
@@ -109,10 +124,11 @@ function displayListOfLinks(array, whereToPut, marker, title) {
 
 }
 
+
 function init() {
     var computerName = localStorage.computerName;
 
-    var zam = "Send to:<select id=\"selector\"><option value=\"\"></option>";
+    var zam = "Send to: <select id=\"selector\"><option value=\"\"></option>";
 
     var s = localStorage.listOfComputers;
     if (s) {
@@ -125,6 +141,33 @@ function init() {
         }
     }
     zam += "</select>";
+
+    function e(id,val) {
+        val=""+(val||(val==0?0:""));
+        var len = val.length;
+        if (len<2) len=2
+        return "<input id='"+id+"' size='1' style='max-width: "+len+"em;' value='"+val+"'/>"
+    }
+
+    var date = new Date(Math.floor((new Date()*1/1000/60/60)+1)*60*60*1000);
+
+    var y = date.getFullYear();
+    var m = date.getMonth()+1;
+    var d = date.getDate();
+    var h = date.getHours();
+    var mi = date.getMinutes();
+
+    var dateTime="<div id='hid' style='display:none;'><font size='-1'>put time to open tab:<br/>"+e("y",y)+"/"+e("m",m)+"/"+e("d",d)+" "+e("h",h)+":"+e("mi",mi)+"</font></div>";
+    dateTime+="<div id='showbutton' style='display:block;'><font size='-1'><a href='#' id='showTime'>set time &gt;&gt;&gt;</a></font></div>"
+
+    zam+="<br />"+dateTime;
+
+    function showSetTime() {
+        $("showbutton").style.display="none";
+        $("hid").style.display="block";
+        $("hid")["present"]=true;
+    }
+
     $("sendTo").innerHTML = zam;
     var opened = localStorage.opened;
     var sent = localStorage.sent;
@@ -143,6 +186,8 @@ function init() {
     if (sent) {
         displayListOfLinks(sentArray, "lastSent", $("sentMarker"), "Sent")
     }
+
+    $("showTime").onclick=showSetTime;
 }
 
 try {
